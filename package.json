@@ -1,0 +1,15 @@
+{
+  "name": "ubase-vue2-example",
+  "version": "0.0.1",
+  "description": "",
+  "main": "",
+  "scripts": {
+    "dev": "gulp --debug",
+    "build": "gulp -p"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ubase-vue": "2.0.11"
+  }
+}
