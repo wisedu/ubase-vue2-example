@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ubase-vue": "2.0.11"
+    "ubase-vue": "2.0.11",
+    "url-loader": "^0.5.8"
   }
 }

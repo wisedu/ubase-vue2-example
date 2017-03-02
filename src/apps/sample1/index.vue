@@ -15,7 +15,6 @@
         },
 
         mounted(){
-            Promise.all([])
             console.log(this.$root.config.name)
         }
     }
