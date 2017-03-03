@@ -1,74 +1,174 @@
 <template>
   <div>
     <div class="cus-top-nav">
-      <div class="logo"><img :src="logo" alt=""></div>
+      <div class="logo"><img :src="index.logo" alt=""></div>
       <nav>
-        <a :href="'#'+item.route" class="cus-top-nav-hover" :class="routeSelected(item.name)?'a-selected':''"
-           @click="changeRoute(item.name)" v-for="item in menu">
+        <a class="cus-top-nav-hover" :class="index.topSelectedMenu.id == item.id?'a-selected':''"
+           @click="changeTopMenu(item.id)" v-for="item in index.menu">
           <div>{{item.title}}</div>
         </a>
       </nav>
     </div>
     <div class="main-wrap">
-      <div class="left-menu">
-        <left-menu :menus="menus"></left-menu>
+      <div class="left-menu" @mouseout="mouseout" @mouseover="mouseover" :style="{'width':leftWidth}">
+        <left-menu :menus="index.leftNav" :mini-mode="miniMode" @on-selected="changeLeftNav" ></left-menu>
       </div>
-      <router-view></router-view>
+      <div class="main-content" :style="{'margin-left':rightMarginLeft}">
+        <page-frame></page-frame>
+      </div>
     </div>
   </div>
 </template>
 <script type="text/ecmascript-6">
-  var logo = require('statics/images/logo.png')
-
   export default {
-    data: function () {
+    computed: {
+      ...Vuex.mapState({
+        index: state => state.index
+      }),
+      leftWidth:function(){
+          if(this.expand){
+            return '276px'
+          }else{
+            return '45px'
+          }
+      },
+      rightMarginLeft:function () {
+        if(this.expand){
+          return '45px'
+        }else{
+          return '45px'
+        }
+      }
+    },
+
+    data:function () {
       return {
-        logo:logo,
-        selectedRoute: '',
-        menus:[{
-          id: 11,
-          title: 'menu1',
-          icon: 'keyboardvoice',
-          visible: true,
-          subMenus: [{id: 33, title: 'submenu1-1'}, {id: 33, title: 'submenu1-2'}, {id: 33, title: 'submenu1-3'}]
-        }, {
-          id: 11,
-          title: 'menu2',
-          icon: 'localflorist',
-          visible: true,
-          subMenus: [{id: 33, title: 'submenu2-1'}, {id: 33, title: 'submenu2-2'}, {id: 33, title: 'submenu2-3'}]
-        }],
-        menu:[{title:'租户管理', name:'323', route:'/menu/323'}, {title:'租户配置', name:'fff', route:'/menu/fff'}, {title:'初始化租户', name:'ddf',route:'/menu/ddf'}]
+          expand:true,
+          miniMode:false
       }
     },
 
     created(){
-      let defaultRoute = null
-      this.menu.forEach(function (item) {
+      let defaultTopMenu = null
+      this.index.menu.forEach(function (item) {
         if (item.default) {
-          defaultRoute = item.route
+          defaultTopMenu = item
         }
       })
 
-      if (!defaultRoute) {
-        defaultRoute = this.menu[0].name;
+      if (!defaultTopMenu) {
+        defaultTopMenu = this.index.menu[0];
       }
 
       if (this.$router.currentRoute.path === '/') {
-        this.$router.replace('/menu/'+defaultRoute)
-        this.selectedRoute = defaultRoute
+        this.changeTopMenu(defaultTopMenu.id)
       } else {
-        this.selectedRoute = this.$route.params.id
+        let topMenuId = this.$route.params.topMenuId
+        let leftMenuId = this.$route.params.leftMenuId
+        this.changeTopMenu(topMenuId, leftMenuId)
       }
     },
 
     methods: {
-      changeRoute(name){
-        this.selectedRoute = name
+      changeTopMenu(selectedTopMenuId, selectedLeftMenuId){
+        var menu = this.__getTopMenuById(selectedTopMenuId)
+
+        this.index.topSelectedMenu = menu
+        this.miniMode = false
+        this.expand = true
+
+        // 如果有url则跳转到新tab页打开 当前页面仍然停留在当前菜单
+        if (menu.url) {
+          window.open(menu.url)
+          return
+        }
+
+        this.index.leftNav = menu.children
+
+        if (selectedLeftMenuId) {
+          this.__setLeftMenuSelectedStatus(selectedLeftMenuId)
+          this.$router.replace(`/${menu.id}/${selectedLeftMenuId}`)
+          return
+        }
+
+        var leftSelectedMenu = this.__setLeftMenuSelectedStatus()
+
+        this.$router.replace(`/${menu.id}/${leftSelectedMenu.id}`)
       },
 
-      routeSelected(name){
-        return this.selectedRoute == name
+      __getTopMenuById(id){
+        var selectedMenu = null
+        this.index.menu.forEach((item) => {
+          if (item.id == id) {
+            selectedMenu = item
+          }
+        })
+
+        return selectedMenu
+      },
+
+      __setLeftMenuSelectedStatus(id){
+        var selected = null
+
+        if (id !== undefined) {
+          this.index.leftNav.forEach((item) => {
+              item.expanded = false
+            item.children.forEach((item2) => {
+              if (item2.id == id) {
+                selected = item2
+                item.expanded = true
+                item2.selected = true
+              } else {
+                item2.selected = false
+              }
+            })
+          })
+        } else {
+          this.index.leftNav.forEach((item) => {
+            item.expanded = false
+            item.children.forEach((item2) => {
+              if (item2.selected) {
+                selected = item2
+                item.expanded = true
+                item2.selected = true
+              } else {
+                item2.selected = false
+              }
+            })
+          })
+        }
+
+        if (!selected) {
+          this.index.leftNav[0].children[0].selected = true
+          this.index.leftNav.forEach((item, index)=>{
+              if(index == 0){
+                  item.expanded = true
+              }else{
+                  item.expanded = false
+              }
+          })
+          selected = this.index.leftNav[0].children[0]
+        }
+
+        this.index.leftSelectedMenu = selected
+
+        return selected
+      },
+
+      changeLeftNav(leftMenu){
+        this.index.leftSelectedMenu = leftMenu
+        let topMenuId = this.$route.params.topMenuId
+        this.$router.replace(`/${topMenuId}/${leftMenu.id}`)
+      },
+
+      mouseover(){
+        this.expand = true
+        this.miniMode = false
+      },
+
+      mouseout(){
+        this.expand = false
+        this.miniMode = true
       }
     }
   }
@@ -76,24 +176,28 @@
 <style scoped lang="less" rel="stylesheet/less">
   .cus-top-nav {
     width: 100%;
-    height: 44px;
-    background-color: #131313;
+    height: 52px;
+    background-color: #2D303A;
   }
 
-  .logo{
+  .logo {
     display: inline-block;
+    width: 276px;
+    height: 52px;
+    background-color: #1D1F25;
   }
+
   .cus-top-nav > nav {
     display: inline-block;
-    height: 44px;
-    line-height: 44px;
+    height: 52px;
+    line-height: 52px;
     vertical-align: top;
   }
 
   .cus-top-nav > title {
     display: inline-block;
-    height: 44px;
-    line-height: 44px;
+    height: 52px;
+    line-height: 52px;
   }
 
   .cus-top-nav > title {
@@ -104,12 +208,12 @@
 
   .cus-top-nav > nav > a {
     display: inline-block;
-    color: #fff;
+    color: #727785;
     box-sizing: border-box;
-    line-height: 40px;
+    line-height: 47px;
     font-size: 14px;
     font-weight: 700;
-
+    cursor: default;
   }
 
   .cus-top-nav > nav > a > div {
@@ -120,29 +224,51 @@
     display: block;
     content: ' ';
     height: 2px;
-    border-bottom: 2px solid #fc9626;
+    border-bottom: 2px solid #4B8EFF;
     transform: scale(0);
     transition-duration: 250ms;
     transition-property: transform;
-    box-shadow: 0px 0px 7px #fc9626;
+    box-shadow: 0px 0px 7px #4B8EFF;
   }
 
   .cus-top-nav > nav > a:hover:after {
     transform: scale(1);
   }
 
+  .cus-top-nav > nav > a.a-selected {
+    color:#4989F8;
+  }
+
   .cus-top-nav > nav > .a-selected:after {
-    border-bottom: 4px solid #fc9626;
+    border-bottom: 4px solid #4B8EFF;
     transform: scale(1);
     margin-top: -2px;
-    box-shadow: 0px 0px 7px #fc9626;
+    box-shadow: 0px 0px 7px #4B8EFF;
   }
 
   .left-menu {
     padding: 0;
-    width:100%;
-    height: calc(~"100% - 44px");
+    display: inline-block;
+    height: calc(~"100% - 52px");
     position: absolute;
+    transition: width  0.25s cubic-bezier(1,.32,.3,.71);
+  }
+
+  .main-content {
+    width: calc(~"100% - 276px");
+    display: inline-block;
+    -webkit-box-flex: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+
+    iframe {
+      height: 100%;
+    }
+  }
+
+  .main-wrap {
+    display: flex;
+    min-height: calc(~"100vh - 56px");
   }
 
   body {
