@@ -16,5 +16,6 @@
   iframe {
     width: 100%;
     border: none;
+    position: absolute;
   }
 </style>

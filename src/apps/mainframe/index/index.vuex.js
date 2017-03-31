@@ -12,23 +12,23 @@ export const state = {
     route: '/dzzs',
     children: [{
       id: 11,
-      title: '单招报名管理',
+      title: '录取管理',
       icon: 'keyboardvoice',
       visible: true,
       expanded:false,
-      children: [{id: 343, title: '单招报名批次管理', url: 'http://www.baidu.com',selected:true}, {
+      children: [{id: 343, title: '汇总成绩计算',
+        url: 'http://172.20.4.235:8081/scoreCal/#!/',}, {
         id: 32263,
-        title: '单招报名表配置',
-        url: 'http://www.qq.com',
+        title: '模版配置', url: 'http://172.20.4.235:8081/admTpl/#!/',
         selected:false
-      }, {id: 3643, title: '报名信息管理',selected:false}]
+      }, {id: 3643, title: '普通考生录取', url:'http://172.20.4.235:8081/comStuEnroll/#!/',selected:false}]
     },{
       id: 43311,
       title: '单招录取管理',
       icon: 'keyboardvoice',
       visible: true,
       expanded:false,
-      children: [{id: 34093, title: '单招录取批次管理', url: 'http://www.baidu.com',selected:true}, {
+      children: [{id: 34093, title: '单招录取批次管理', url: 'http://www.baidu.com'}, {
         id: 360993,
         title: '单招录取表配置',
         url: 'http://www.qq.com',

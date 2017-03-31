@@ -131,6 +131,7 @@
       height: 56px;
       line-height: 56px;
       padding-left: 12px;
+      cursor: default;
 
       &.selected {
         color: #fff;
@@ -160,6 +161,7 @@
       cursor: default;
       height: 48px;
       line-height: 48px;
+      cursor: pointer;;
 
       &:hover {
         background-color: rgba(200, 200, 200, 0.1);

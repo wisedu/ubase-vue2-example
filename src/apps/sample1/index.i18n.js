@@ -1,5 +1,5 @@
-var cn = {
+var zh_CN = {
   title: 'demo title',
 };
 
-export default { cn };
+export default { zh_CN };

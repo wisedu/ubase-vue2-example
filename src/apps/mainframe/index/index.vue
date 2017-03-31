@@ -127,6 +127,9 @@
           this.index.leftNav.forEach((item) => {
             item.expanded = false
             item.children.forEach((item2) => {
+              if(selected){
+                return
+              }
               if (item2.selected) {
                 selected = item2
                 item.expanded = true
@@ -213,7 +216,7 @@
     line-height: 47px;
     font-size: 14px;
     font-weight: 700;
-    cursor: default;
+    cursor: pointer;
   }
 
   .cus-top-nav > nav > a > div {
@@ -247,6 +250,7 @@
   }
 
   .left-menu {
+    z-index: 100;
     padding: 0;
     display: inline-block;
     height: calc(~"100% - 52px");
@@ -255,6 +259,7 @@
   }
 
   .main-content {
+    position: relative;
     width: calc(~"100% - 276px");
     display: inline-block;
     -webkit-box-flex: 1;
